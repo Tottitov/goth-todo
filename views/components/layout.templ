@@ -1,0 +1,66 @@
+package components
+
+import "github.com/Tottitov/todo/internal/models"
+
+templ Layout(todos []models.Todo) {
+	<html>
+		<head>
+			<title>Tony's Todo App</title>
+			<!-- Tailwind CSS -->
+			<script src="https://cdn.tailwindcss.com"></script>
+			<!-- HTMX -->
+			<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		</head>
+		<body class="min-h-screen bg-gray-900 p-4 sm:p-6 text-white">
+			<div class="max-w-md mx-auto">
+				<h1 class="text-3xl font-bold mb-6 text-blue-400">Tony's Todo App</h1>
+				<div id="error-box" class="text-red-500 text-sm mb-2"></div>
+				<form
+					class="flex gap-2 mb-6"
+					hx-post="/todos"
+					hx-target="#todo-list"
+					hx-swap="beforeend"
+					hx-on="
+						htmx:afterSwap: handleSuccess();
+						htmx:responseError: handleError()
+					"
+				>
+					<input
+						id="todo-input"
+						class="bg-gray-800 border border-gray-700 text-gray-200 px-4 py-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						type="text"
+						name="title"
+						placeholder="What needs to be done?"
+						required
+						oninput="clearError()"
+					/>
+					<button
+						class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-lg font-medium transition-colors"
+						type="submit"
+					>
+						Add
+					</button>
+				</form>
+				<div id="todo-list" class="flex flex-col gap-0">
+					for _, todo := range todos {
+						@TodoItem(todo)
+					}
+				</div>
+			</div>
+			<script>
+				function handleError() {
+					document.querySelector('#error-box').textContent = 'Todo already exists'
+					document.querySelector('#todo-input').value = ''
+				}
+				function handleSuccess() {
+					document.querySelector('#error-box').textContent = ''
+					document.querySelector('#todo-input').value = ''
+				}
+				function clearError() {
+					document.querySelector('#error-box').textContent = ''
+				}
+			</script>
+		</body>
+	</html>
+}

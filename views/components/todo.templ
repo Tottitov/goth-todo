@@ -1,0 +1,31 @@
+package components
+
+import (
+	"github.com/Tottitov/todo/internal/models"
+	"strconv"
+)
+
+templ TodoItem(todo models.Todo) {
+	<div
+		id={ "todo-" + strconv.Itoa(todo.ID) }
+		class="
+			bg-gray-800
+			rounded-lg
+			shadow-lg
+			px-4 py-3
+			mb-3
+			flex
+			items-center
+			justify-between
+		"
+	>
+		<span class="text-gray-200">{ todo.Title }</span>
+		<button
+			hx-delete={ "/todos/" + strconv.Itoa(todo.ID) }
+			hx-target={ "#todo-" + strconv.Itoa(todo.ID) }
+			hx-swap="outerHTML"
+			class="text-red-400 hover:text-red-300 text-xl transition-colors"
+			aria-label="Delete todo"
+		>×</button>
+	</div>
+}
