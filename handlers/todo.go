@@ -13,34 +13,13 @@ type TodoHandler struct {
 	DB *pgxpool.Pool
 }
 
-// List handles displaying all todos with optional filters: all, active, completed
 func (h *TodoHandler) List(w http.ResponseWriter, r *http.Request) {
-	filter := r.URL.Query().Get("filter") // "active", "completed", or "" (default = all)
+	filter := r.URL.Query().Get("filter")
 
-	query := "SELECT id, title, completed FROM todos"
-	switch filter {
-	case "active":
-		query += " WHERE completed = false"
-	case "completed":
-		query += " WHERE completed = true"
-	}
-	query += " ORDER BY id"
-
-	rows, err := h.DB.Query(r.Context(), query)
+	todos, err := h.fetchTodos(r, filter)
 	if err != nil {
 		http.Error(w, "Failed to fetch todos", http.StatusInternalServerError)
 		return
-	}
-	defer rows.Close()
-
-	var todos []models.Todo
-	for rows.Next() {
-		var todo models.Todo
-		if err := rows.Scan(&todo.ID, &todo.Title, &todo.Completed); err != nil {
-			http.Error(w, "Failed to scan todo", http.StatusInternalServerError)
-			return
-		}
-		todos = append(todos, todo)
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -49,7 +28,6 @@ func (h *TodoHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Create handles adding a new todo
 func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
@@ -62,42 +40,25 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var id int
-	err := h.DB.QueryRow(r.Context(),
-		"INSERT INTO todos (title, completed) VALUES ($1, $2) RETURNING id",
-		title, false).Scan(&id)
+	_, err := h.DB.Exec(r.Context(),
+		"INSERT INTO todos (title, completed) VALUES ($1, $2)",
+		title, false)
 	if err != nil {
 		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
-		rows, err := h.DB.Query(r.Context(), "SELECT id, title, completed FROM todos ORDER BY id")
-		if err != nil {
-			http.Error(w, "failed to reload todos", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-
-		var todos []models.Todo
-		for rows.Next() {
-			var t models.Todo
-			if err := rows.Scan(&t.ID, &t.Title, &t.Completed); err != nil {
-				http.Error(w, "error reading todos", http.StatusInternalServerError)
-				return
-			}
-			todos = append(todos, t)
-		}
-
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusCreated)
-		components.TodoList(todos, "").Render(r.Context(), w)
-	} else {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	todos, err := h.fetchTodos(r, "")
+	if err != nil {
+		http.Error(w, "failed to reload todos", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusCreated)
+	components.TodoListContent(todos, "").Render(r.Context(), w)
 }
 
-// Update handles updating a todo's title
 func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -138,7 +99,6 @@ func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Delete handles removing a todo
 func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -153,32 +113,16 @@ func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
-		rows, err := h.DB.Query(r.Context(), "SELECT id, title, completed FROM todos ORDER BY id")
-		if err != nil {
-			http.Error(w, "error reloading todos", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-
-		var todos []models.Todo
-		for rows.Next() {
-			var t models.Todo
-			if err := rows.Scan(&t.ID, &t.Title, &t.Completed); err != nil {
-				http.Error(w, "error reading todos", http.StatusInternalServerError)
-				return
-			}
-			todos = append(todos, t)
-		}
-
-		w.Header().Set("Content-Type", "text/html")
-		components.TodoList(todos, "").Render(r.Context(), w)
-	} else {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	todos, err := h.fetchTodos(r, "")
+	if err != nil {
+		http.Error(w, "failed to reload todos", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html")
+	components.TodoListContent(todos, "").Render(r.Context(), w)
 }
 
-// ToggleComplete handles toggling a todo's completion status and updates the entire list
 func (h *TodoHandler) ToggleComplete(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -200,42 +144,45 @@ func (h *TodoHandler) ToggleComplete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
-		rows, err := h.DB.Query(r.Context(), "SELECT id, title, completed FROM todos ORDER BY id")
-		if err != nil {
-			http.Error(w, "failed to reload todos", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-
-		var todos []models.Todo
-		for rows.Next() {
-			var t models.Todo
-			if err := rows.Scan(&t.ID, &t.Title, &t.Completed); err != nil {
-				http.Error(w, "error reading todos", http.StatusInternalServerError)
-				return
-			}
-			todos = append(todos, t)
-		}
-
-		w.Header().Set("Content-Type", "text/html")
-		components.TodoList(todos, "").Render(r.Context(), w)
-	} else {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	todos, err := h.fetchTodos(r, "")
+	if err != nil {
+		http.Error(w, "failed to reload todos", http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html")
+	components.TodoListContent(todos, "").Render(r.Context(), w)
 }
 
-// DeleteCompleted removes all completed todos
 func (h TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
 	if _, err := h.DB.Exec(r.Context(), "DELETE FROM todos WHERE completed = true"); err != nil {
 		http.Error(w, "error clearing completed todos", http.StatusInternalServerError)
 		return
 	}
 
-	rows, err := h.DB.Query(r.Context(), "SELECT id, title, completed FROM todos ORDER BY id")
+	todos, err := h.fetchTodos(r, "")
 	if err != nil {
-		http.Error(w, "error reloading todos", http.StatusInternalServerError)
+		http.Error(w, "failed to reload todos", http.StatusInternalServerError)
 		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	components.TodoListContent(todos, "").Render(r.Context(), w)
+}
+
+func (h *TodoHandler) fetchTodos(r *http.Request, filter string) ([]models.Todo, error) {
+	query := "SELECT id, title, completed FROM todos"
+	switch filter {
+	case "active":
+		query += " WHERE completed = false"
+	case "completed":
+		query += " WHERE completed = true"
+	}
+	query += " ORDER BY id"
+
+	rows, err := h.DB.Query(r.Context(), query)
+	if err != nil {
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -243,12 +190,9 @@ func (h TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var t models.Todo
 		if err := rows.Scan(&t.ID, &t.Title, &t.Completed); err != nil {
-			http.Error(w, "error reading todos", http.StatusInternalServerError)
-			return
+			return nil, err
 		}
 		todos = append(todos, t)
 	}
-
-	w.Header().Set("Content-Type", "text/html")
-	components.TodoList(todos, "").Render(r.Context(), w)
+	return todos, nil
 }

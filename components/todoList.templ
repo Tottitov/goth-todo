@@ -49,9 +49,10 @@ templ TodoListContent(todos []models.Todo, filter string) {
 		for _, todo := range todos {
 			@TodoItem(todo)
 		}
-		<!-- Footer with filter buttons -->
+		<!-- Footer -->
 		<div class="flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300">
 			<div>{ strconv.Itoa(activeCount(todos)) } items left</div>
+			<!-- Filters -->
 			<div class="flex gap-2">
 				<a href="/" class={ filterClass(filter, "") }>All</a>
 				<a href="/?filter=active" class={ filterClass(filter, "active") }>Active</a>
@@ -62,7 +63,7 @@ templ TodoListContent(todos []models.Todo, filter string) {
 					hx-post="/todos/completed"
 					hx-include="[name=_method]"
 					hx-target="#todo-list"
-					hx-swap="innerHTML"
+					hx-swap="outerHTML"
 				>
 					<input type="hidden" name="_method" value="DELETE"/>
 					<button
