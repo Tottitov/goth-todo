@@ -1,4 +1,3 @@
-// handlers/todo.go
 package handlers
 
 import (
@@ -14,9 +13,20 @@ type TodoHandler struct {
 	DB *pgxpool.Pool
 }
 
-// List handles displaying all todos
+// List handles displaying all todos with optional filters: all, active, completed
 func (h *TodoHandler) List(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Query(r.Context(), "SELECT id, title, completed FROM todos ORDER BY id")
+	filter := r.URL.Query().Get("filter") // "active", "completed", or "" (default = all)
+
+	query := "SELECT id, title, completed FROM todos"
+	switch filter {
+	case "active":
+		query += " WHERE completed = false"
+	case "completed":
+		query += " WHERE completed = true"
+	}
+	query += " ORDER BY id"
+
+	rows, err := h.DB.Query(r.Context(), query)
 	if err != nil {
 		http.Error(w, "Failed to fetch todos", http.StatusInternalServerError)
 		return
@@ -34,7 +44,7 @@ func (h *TodoHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := components.TodoList(todos).Render(r.Context(), w); err != nil {
+	if err := components.TodoList(todos, filter).Render(r.Context(), w); err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 	}
 }
@@ -81,7 +91,7 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusCreated)
-		components.TodoListContent(todos).Render(r.Context(), w)
+		components.TodoList(todos, "").Render(r.Context(), w)
 	} else {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
@@ -162,7 +172,7 @@ func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		components.TodoListContent(todos).Render(r.Context(), w)
+		components.TodoList(todos, "").Render(r.Context(), w)
 	} else {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
@@ -209,13 +219,13 @@ func (h *TodoHandler) ToggleComplete(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		components.TodoListContent(todos).Render(r.Context(), w)
+		components.TodoList(todos, "").Render(r.Context(), w)
 	} else {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
-// Delete all completed todos
+// DeleteCompleted removes all completed todos
 func (h TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
 	if _, err := h.DB.Exec(r.Context(), "DELETE FROM todos WHERE completed = true"); err != nil {
 		http.Error(w, "error clearing completed todos", http.StatusInternalServerError)
@@ -239,5 +249,6 @@ func (h TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
 		todos = append(todos, t)
 	}
 
-	components.TodoListContent(todos).Render(r.Context(), w)
+	w.Header().Set("Content-Type", "text/html")
+	components.TodoList(todos, "").Render(r.Context(), w)
 }

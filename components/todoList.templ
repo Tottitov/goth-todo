@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-templ TodoList(todos []models.Todo) {
+templ TodoList(todos []models.Todo, filter string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -39,18 +39,24 @@ templ TodoList(todos []models.Todo) {
 					Add
 				</button>
 			</form>
-			@TodoListContent(todos)
+			@TodoListContent(todos, filter)
 		</body>
 	</html>
 }
 
-templ TodoListContent(todos []models.Todo) {
+templ TodoListContent(todos []models.Todo, filter string) {
 	<div id="todo-list">
 		for _, todo := range todos {
 			@TodoItem(todo)
 		}
-		<div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+		<!-- Footer with filter buttons -->
+		<div class="flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300">
 			<div>{ strconv.Itoa(activeCount(todos)) } items left</div>
+			<div class="flex gap-2">
+				<a href="/" class={ filterClass(filter, "") }>All</a>
+				<a href="/?filter=active" class={ filterClass(filter, "active") }>Active</a>
+				<a href="/?filter=completed" class={ filterClass(filter, "completed") }>Completed</a>
+			</div>
 			if hasCompleted(todos) {
 				<form
 					hx-post="/todos/completed"
@@ -61,7 +67,7 @@ templ TodoListContent(todos []models.Todo) {
 					<input type="hidden" name="_method" value="DELETE"/>
 					<button
 						type="submit"
-						class="text-gray-500 hover:text-gray-800 underline"
+						class="text-gray-500 hover:text-gray-800 dark:hover:text-white underline"
 					>
 						Clear completed
 					</button>
@@ -88,4 +94,11 @@ func hasCompleted(todos []models.Todo) bool {
 		}
 	}
 	return false
+}
+
+func filterClass(current string, name string) string {
+	if current == name {
+		return "px-2 py-1 border rounded border-red-500"
+	}
+	return "px-2 py-1 hover:underline"
 }
