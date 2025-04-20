@@ -1,0 +1,40 @@
+package components
+
+import (
+	"github.com/Tottitov/todo/models"
+	"strconv"
+)
+
+templ TodoItem(todo models.Todo) {
+	<div
+		id={ "todo-" + itoa(todo.ID) }
+		class="flex items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-700 py-2"
+	>
+		<div class="flex items-center gap-3">
+			<input
+				type="checkbox"
+				class="h-5 w-5 accent-blue-600 dark:accent-blue-400"
+				checked?={ todo.Completed }
+				hx-post={ "/todos/" + itoa(todo.ID) + "/toggle" }
+				hx-target="#todo-list"
+				hx-swap="outerHTML"
+				hx-preserve="true"
+			/>
+			<span class={ templ.KV("line-through text-gray-500 dark:text-gray-400", todo.Completed) }>
+				{ todo.Title }
+			</span>
+		</div>
+		<button
+			class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400"
+			hx-delete={ "/todos/" + itoa(todo.ID) }
+			hx-target="#todo-list"
+			hx-swap="outerHTML"
+		>
+			Delete
+		</button>
+	</div>
+}
+
+func itoa(i int) string {
+	return strconv.Itoa(i)
+}
