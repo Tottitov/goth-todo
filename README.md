@@ -56,4 +56,5 @@ This project helped me dive into fullstack web development with a modern Go work
 ---
 
 ## Screenshots
-![image](https://github.com/user-attachments/assets/cdab743b-c550-4cec-8ae2-2d70a831b887)
+![image](https://github.com/user-attachments/assets/5791a71a-0b7a-4d32-9962-64710e0eb9cf)
+
