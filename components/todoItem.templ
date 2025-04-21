@@ -20,9 +20,6 @@ templ TodoItem(todo models.Todo) {
 				hx-swap="outerHTML"
 				hx-preserve="true"
 			/>
-			<span class={ templ.KV("line-through text-gray-500 dark:text-gray-400", todo.Completed) }>
-				{ todo.Title }
-			</span>
 			<span
 				class={ templ.KV("line-through text-gray-500 dark:text-gray-400", todo.Completed) }
 				hx-get={ "/todos/" + itoa(todo.ID) + "/edit" }
