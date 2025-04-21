@@ -4,7 +4,7 @@ import "github.com/Tottitov/todo/models"
 
 templ TodoEdit(todo models.Todo) {
 	<form
-		hx-on="submit: preventDefault"
+		onsubmit="return false;"
 		id={ "todo-" + itoa(todo.ID) }
 		class="flex items-center gap-3 border-b border-gray-200 dark:border-gray-700 py-2"
 		hx-patch={ "/todos/" + itoa(todo.ID) }
