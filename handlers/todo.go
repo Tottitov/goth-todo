@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Tottitov/todo/components"
@@ -14,13 +15,18 @@ type TodoHandler struct {
 
 func (h *TodoHandler) List(w http.ResponseWriter, r *http.Request) {
 	filter := r.URL.Query().Get("filter")
-	todos, err := h.fetchTodos(r, filter)
+	allTodos, err := h.fetchAllTodos(r.Context())
 	if err != nil {
 		sendError(w, "Failed to fetch todos", http.StatusInternalServerError)
 		return
 	}
+
+	activeCount := countActive(allTodos)
+
+	displayTodos := filterTodos(allTodos, filter)
+
 	setHTMLHeader(w)
-	components.TodoList(todos, filter).Render(r.Context(), w)
+	components.TodoList(displayTodos, filter, activeCount).Render(r.Context(), w)
 }
 
 func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -42,14 +48,17 @@ func (h *TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos, err := h.fetchTodos(r, "")
+	allTodos, err := h.fetchAllTodos(r.Context())
 	if err != nil {
 		sendError(w, "Failed to reload todos", http.StatusInternalServerError)
 		return
 	}
+	displayTodos := filterTodos(allTodos, "")
+	activeCount := countActive(allTodos)
+
 	setHTMLHeader(w)
 	w.WriteHeader(http.StatusCreated)
-	components.TodoListContent(todos, "").Render(r.Context(), w)
+	components.TodoListContent(displayTodos, "", activeCount).Render(r.Context(), w)
 }
 
 func (h *TodoHandler) Edit(w http.ResponseWriter, r *http.Request) {
@@ -126,13 +135,16 @@ func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos, err := h.fetchTodos(r, "")
+	allTodos, err := h.fetchAllTodos(r.Context())
 	if err != nil {
 		sendError(w, "Failed to reload todos", http.StatusInternalServerError)
 		return
 	}
+	displayTodos := filterTodos(allTodos, "")
+	activeCount := countActive(allTodos)
+
 	setHTMLHeader(w)
-	components.TodoListContent(todos, "").Render(r.Context(), w)
+	components.TodoListContent(displayTodos, "", activeCount).Render(r.Context(), w)
 }
 
 func (h *TodoHandler) ToggleComplete(w http.ResponseWriter, r *http.Request) {
@@ -159,13 +171,16 @@ func (h *TodoHandler) ToggleComplete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos, err := h.fetchTodos(r, "")
+	allTodos, err := h.fetchAllTodos(r.Context())
 	if err != nil {
 		sendError(w, "Failed to reload todos", http.StatusInternalServerError)
 		return
 	}
+	displayTodos := filterTodos(allTodos, "")
+	activeCount := countActive(allTodos)
+
 	setHTMLHeader(w)
-	components.TodoListContent(todos, "").Render(r.Context(), w)
+	components.TodoListContent(displayTodos, "", activeCount).Render(r.Context(), w)
 }
 
 func (h *TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
@@ -175,19 +190,22 @@ func (h *TodoHandler) DeleteCompleted(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todos, err := h.fetchTodos(r, "")
+	allTodos, err := h.fetchAllTodos(r.Context())
 	if err != nil {
 		sendError(w, "Failed to reload todos", http.StatusInternalServerError)
 		return
 	}
+	displayTodos := filterTodos(allTodos, "")
+	activeCount := countActive(allTodos)
+
 	setHTMLHeader(w)
-	components.TodoListContent(todos, "").Render(r.Context(), w)
+	components.TodoListContent(displayTodos, "", activeCount).Render(r.Context(), w)
 }
 
-func (h *TodoHandler) fetchTodos(r *http.Request, filter string) ([]models.Todo, error) {
-	query := "SELECT id, title, completed FROM todos WHERE ($1 = '' OR (completed = false AND $1 = 'active') OR (completed = true AND $1 = 'completed')) ORDER BY id"
+func (h *TodoHandler) fetchAllTodos(ctx context.Context) ([]models.Todo, error) {
+	query := "SELECT id, title, completed FROM todos ORDER BY id"
 
-	rows, err := h.DB.Query(r.Context(), query, filter)
+	rows, err := h.DB.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -202,4 +220,33 @@ func (h *TodoHandler) fetchTodos(r *http.Request, filter string) ([]models.Todo,
 		todos = append(todos, t)
 	}
 	return todos, nil
+}
+
+func filterTodos(todos []models.Todo, filter string) []models.Todo {
+	var filtered []models.Todo
+	for _, todo := range todos {
+		switch filter {
+		case "active":
+			if !todo.Completed {
+				filtered = append(filtered, todo)
+			}
+		case "completed":
+			if todo.Completed {
+				filtered = append(filtered, todo)
+			}
+		default:
+			filtered = append(filtered, todo)
+		}
+	}
+	return filtered
+}
+
+func countActive(todos []models.Todo) int {
+	count := 0
+	for _, todo := range todos {
+		if !todo.Completed {
+			count++
+		}
+	}
+	return count
 }

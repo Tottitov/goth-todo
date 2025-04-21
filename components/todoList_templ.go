@@ -13,7 +13,7 @@ import (
 	"strconv"
 )
 
-func TodoList(todos []models.Todo, filter string) templ.Component {
+func TodoList(todos []models.Todo, filter string, activeCount int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -34,11 +34,11 @@ func TodoList(todos []models.Todo, filter string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Simple Todo App</title><script src=\"https://unpkg.com/htmx.org@1.9.5\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100 font-sans max-w-xl mx-auto p-6\"><h1 class=\"text-3xl font-bold mb-4\">Todos</h1><form hx-post=\"/todos\" hx-target=\"#todo-list\" hx-swap=\"outerHTML\" hx-on=\"htmx:afterOnLoad: this.querySelector(&#39;input[name=title]&#39;).value = &#39;&#39;\" class=\"flex gap-2 mb-6\"><input type=\"text\" name=\"title\" placeholder=\"What needs to be done?\" maxlength=\"35\" required class=\"flex-grow border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400\"> <button type=\"submit\" class=\"bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600\">Add</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Tony's Todo App</title><script src=\"https://unpkg.com/htmx.org@1.9.5\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100 font-sans max-w-xl mx-auto p-6\"><h1 class=\"text-3xl font-bold mb-4\">Todos</h1><form hx-post=\"/todos\" hx-target=\"#todo-list\" hx-swap=\"outerHTML\" hx-on=\"htmx:afterOnLoad: this.querySelector(&#39;input[name=title]&#39;).value = &#39;&#39;\" class=\"flex gap-2 mb-6\"><input type=\"text\" name=\"title\" placeholder=\"What needs to be done?\" maxlength=\"35\" required class=\"flex-grow border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400\"> <button type=\"submit\" class=\"bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600\">Add</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = TodoListContent(todos, filter).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = TodoListContent(todos, filter, activeCount).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func TodoList(todos []models.Todo, filter string) templ.Component {
 	})
 }
 
-func TodoListContent(todos []models.Todo, filter string) templ.Component {
+func TodoListContent(todos []models.Todo, filter string, activeCount int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -86,15 +86,15 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(activeCount(todos)))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(activeCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/todoList.templ`, Line: 54, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/todoList.templ`, Line: 54, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " items left</div><!-- Filters --><div class=\"flex gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " items left!</div><!-- Filters --><div class=\"flex gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -165,7 +165,7 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if hasCompleted(todos) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<form hx-post=\"/todos/completed\" hx-include=\"[name=_method]\" hx-target=\"#todo-list\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"_method\" value=\"DELETE\"> <button type=\"submit\" class=\"text-gray-500 hover:text-gray-800 dark:hover:text-white underline\">Clear completed</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<form hx-post=\"/todos/completed\" hx-include=\"[name=_method]\" hx-target=\"#todo-list\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"_method\" value=\"DELETE\"> <button type=\"submit\" class=\"text-gray-500 hover:text-gray-800 dark:hover:text-white underline\">Delete completed</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -176,16 +176,6 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 		}
 		return nil
 	})
-}
-
-func activeCount(todos []models.Todo) int {
-	count := 0
-	for _, t := range todos {
-		if !t.Completed {
-			count++
-		}
-	}
-	return count
 }
 
 func hasCompleted(todos []models.Todo) bool {

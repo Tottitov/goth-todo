@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-templ TodoList(todos []models.Todo, filter string) {
+templ TodoList(todos []models.Todo, filter string, activeCount int) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -39,19 +39,19 @@ templ TodoList(todos []models.Todo, filter string) {
 					Add
 				</button>
 			</form>
-			@TodoListContent(todos, filter)
+			@TodoListContent(todos, filter, activeCount)
 		</body>
 	</html>
 }
 
-templ TodoListContent(todos []models.Todo, filter string) {
+templ TodoListContent(todos []models.Todo, filter string, activeCount int) {
 	<div id="todo-list">
 		for _, todo := range todos {
 			@TodoItem(todo)
 		}
 		<!-- Footer -->
 		<div class="flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300">
-			<div>{ strconv.Itoa(activeCount(todos)) } items left!</div>
+			<div>{ strconv.Itoa(activeCount) } items left!</div>
 			<!-- Filters -->
 			<div class="flex gap-2">
 				<a href="/" class={ filterClass(filter, "") }>All</a>
@@ -76,16 +76,6 @@ templ TodoListContent(todos []models.Todo, filter string) {
 			}
 		</div>
 	</div>
-}
-
-func activeCount(todos []models.Todo) int {
-	count := 0
-	for _, t := range todos {
-		if !t.Completed {
-			count++
-		}
-	}
-	return count
 }
 
 func hasCompleted(todos []models.Todo) bool {
