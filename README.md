@@ -20,7 +20,7 @@ This project helped me dive into fullstack web development with a modern Go work
 
 ### Templ (HTML in Go)
 - Used [Templ](https://templ.guide) for type-safe HTML templating in Go
-- Created reusable UI components (`layout.templ`, `todo.templ`)
+- Created reusable UI components (`todoList.templ`, `todoItem.templ`, `todoEdit.templ`)
 - Rendered templates server-side for each request
 
 ---
