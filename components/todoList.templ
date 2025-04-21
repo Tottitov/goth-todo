@@ -51,7 +51,7 @@ templ TodoListContent(todos []models.Todo, filter string) {
 		}
 		<!-- Footer -->
 		<div class="flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300">
-			<div>{ strconv.Itoa(activeCount(todos)) } items left</div>
+			<div>{ strconv.Itoa(activeCount(todos)) } items left!</div>
 			<!-- Filters -->
 			<div class="flex gap-2">
 				<a href="/" class={ filterClass(filter, "") }>All</a>
