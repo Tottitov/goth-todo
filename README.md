@@ -1,9 +1,9 @@
 # goth-todo 📝
 
-![image](https://github.com/user-attachments/assets/5791a71a-0b7a-4d32-9962-64710e0eb9cf)
-
 A minimal fullstack todo app built using the GOTH stack:  
 **Go + HTMX + Templ + PostgreSQL**, deployed with **Fly.io**.
+
+![image](https://github.com/user-attachments/assets/5791a71a-0b7a-4d32-9962-64710e0eb9cf)
 
 <br/>
 
