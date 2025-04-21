@@ -11,7 +11,7 @@ templ TodoEdit(todo models.Todo) {
 		hx-params="title"
 		hx-target={ "#todo-" + itoa(todo.ID) }
 		hx-swap="outerHTML"
-		hx-trigger="keyup[enter], blur from:input"
+		hx-trigger="keydown.enter"
 	>
 		<input
 			type="text"
