@@ -25,7 +25,6 @@ func main() {
 	defer dbPool.Close()
 
 	todoHandler := &handlers.TodoHandler{DB: dbPool}
-
 	r := chi.NewRouter()
 
 	// List & create
