@@ -5,8 +5,6 @@ A minimal fullstack todo app built using the GOTH stack:
 
 ![image](https://github.com/user-attachments/assets/5791a71a-0b7a-4d32-9962-64710e0eb9cf)
 
-<br/>
-
 ## What I Learned
 
 This project helped me dive into fullstack web development with a modern Go workflow. Here’s a breakdown of what I picked up:
