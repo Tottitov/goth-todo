@@ -47,7 +47,7 @@ func TodoItem(todo models.Todo) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-700 py-2\"><div class=\"flex items-center gap-3\"><input type=\"checkbox\" class=\"h-5 w-5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 accent-blue-600 dark:accent-blue-400\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-700 py-2\"><div class=\"flex items-center gap-3\"><input type=\"checkbox\" class=\"h-5 w-5 rounded border dark:border-gray-600 dark:bg-gray-800 dark:accent-blue-400\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

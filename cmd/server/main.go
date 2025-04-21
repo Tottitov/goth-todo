@@ -23,6 +23,7 @@ func main() {
 
 	mux.HandleFunc("GET /", todoHandler.List)
 	mux.HandleFunc("POST /todos", todoHandler.Create)
+	mux.HandleFunc("GET /todos/{id}/edit", todoHandler.Edit)
 	mux.HandleFunc("PATCH /todos/{id}", todoHandler.Update)
 	mux.HandleFunc("DELETE /todos/{id}", todoHandler.Delete)
 	mux.HandleFunc("POST /todos/{id}/toggle", todoHandler.ToggleComplete)

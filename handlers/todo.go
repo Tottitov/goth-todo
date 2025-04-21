@@ -99,6 +99,31 @@ func (h *TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *TodoHandler) Edit(w http.ResponseWriter, r *http.Request) {
+	// pull the ID out of the URL just like in Update
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	// load the full todo from the database
+	var todo models.Todo
+	err = h.DB.QueryRow(r.Context(),
+		"SELECT id, title, completed FROM todos WHERE id = $1",
+		id,
+	).Scan(&todo.ID, &todo.Title, &todo.Completed)
+	if err != nil {
+		http.Error(w, "todo not found", http.StatusNotFound)
+		return
+	}
+
+	// render exactly the edit form you made
+	w.Header().Set("Content-Type", "text/html")
+	components.TodoEdit(todo).Render(r.Context(), w)
+}
+
 func (h *TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)

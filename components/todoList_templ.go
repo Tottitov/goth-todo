@@ -81,7 +81,7 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Footer with filter buttons --><div class=\"flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300\"><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Footer --><div class=\"flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300\"><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,7 +94,7 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " items left</div><div class=\"flex gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " items left</div><!-- Filters --><div class=\"flex gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -165,7 +165,7 @@ func TodoListContent(todos []models.Todo, filter string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if hasCompleted(todos) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<form hx-post=\"/todos/completed\" hx-include=\"[name=_method]\" hx-target=\"#todo-list\" hx-swap=\"innerHTML\"><input type=\"hidden\" name=\"_method\" value=\"DELETE\"> <button type=\"submit\" class=\"text-gray-500 hover:text-gray-800 dark:hover:text-white underline\">Clear completed</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<form hx-post=\"/todos/completed\" hx-include=\"[name=_method]\" hx-target=\"#todo-list\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"_method\" value=\"DELETE\"> <button type=\"submit\" class=\"text-gray-500 hover:text-gray-800 dark:hover:text-white underline\">Clear completed</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

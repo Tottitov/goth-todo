@@ -1,0 +1,23 @@
+package components
+
+import "github.com/Tottitov/todo/models"
+
+templ TodoEdit(todo models.Todo) {
+	<form
+		id={ "todo-" + itoa(todo.ID) }
+		class="flex items-center gap-3 border-b border-gray-200 dark:border-gray-700 py-2"
+		hx-patch={ "/todos/" + itoa(todo.ID) }
+		hx-params="title"
+		hx-target={ "#todo-" + itoa(todo.ID) }
+		hx-swap="outerHTML"
+		hx-trigger="keyup[enter], blur from:input"
+	>
+		<input
+			type="text"
+			name="title"
+			value={ todo.Title }
+			class="flex-grow px-2 py-1 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+			autofocus
+		/>
+	</form>
+}
