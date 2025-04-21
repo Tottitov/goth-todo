@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Tottitovodo/components"
-	"github.com/Tottitovodo/models"
+	"github.com/Tottitov/todo/components"
+	"github.com/Tottitov/todo/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
