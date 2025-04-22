@@ -2,7 +2,10 @@ package components
 
 import "github.com/Tottitov/todo/models"
 
+// TodoEdit renders the edit form for a todo item
+// This component is displayed when a todo item enters edit mode
 templ TodoEdit(todo models.Todo) {
+	<!-- Edit form with HTMX patch request on submit or blur -->
 	<form
 		id={ "todo-" + itoa(todo.ID) }
 		class="flex items-center gap-3 border-b border-gray-200 dark:border-gray-700 py-2"
@@ -12,6 +15,7 @@ templ TodoEdit(todo models.Todo) {
 		hx-swap="outerHTML"
 		hx-trigger="submit, blur from:input"
 	>
+		<!-- Auto-focused input field for editing todo title -->
 		<input
 			type="text"
 			name="title"

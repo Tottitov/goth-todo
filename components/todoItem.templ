@@ -5,12 +5,16 @@ import (
 	"strconv"
 )
 
+// TodoItem renders a single todo item with its completion checkbox and delete button
+// The component uses HTMX for interactive updates without full page reloads
 templ TodoItem(todo models.Todo) {
+	<!-- Todo item container with unique ID -->
 	<div
 		id={ "todo-" + itoa(todo.ID) }
 		class="flex items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-700 py-2"
 	>
 		<div class="flex items-center gap-3">
+			<!-- Completion toggle checkbox with HTMX update -->
 			<input
 				type="checkbox"
 				class="h-5 w-5 rounded border dark:border-gray-600 dark:bg-gray-800 dark:accent-blue-400"
@@ -20,6 +24,7 @@ templ TodoItem(todo models.Todo) {
 				hx-swap="outerHTML"
 				hx-preserve="true"
 			/>
+			<!-- Todo title with double-click to edit -->
 			<span
 				class={ templ.KV("line-through text-gray-500 dark:text-gray-400", todo.Completed) }
 				hx-get={ "/todos/" + itoa(todo.ID) + "/edit" }
@@ -30,6 +35,7 @@ templ TodoItem(todo models.Todo) {
 				{ todo.Title }
 			</span>
 		</div>
+		<!-- Delete button with HTMX delete action -->
 		<button
 			class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400"
 			hx-delete={ "/todos/" + itoa(todo.ID) }

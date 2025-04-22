@@ -5,18 +5,23 @@ import (
 	"strconv"
 )
 
+// TodoList renders the main todo application page, including the header, input form,
+// and the list of todos with filtering capabilities
 templ TodoList(todos []models.Todo, filter string, activeCount int) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
+			<!-- Meta tags for proper rendering and viewport settings -->
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>Tony's Todo App</title>
+			<!-- External dependencies: HTMX for dynamic updates and Tailwind for styling -->
 			<script src="https://unpkg.com/htmx.org@1.9.5"></script>
 			<script src="https://cdn.tailwindcss.com"></script>
 		</head>
 		<body class="bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100 font-sans max-w-xl mx-auto p-6">
 			<h1 class="text-3xl font-bold mb-4">Todos</h1>
+			<!-- New todo form: Posts to /todos and updates the todo list -->
 			<form
 				hx-post="/todos"
 				hx-target="#todo-list"
@@ -24,6 +29,7 @@ templ TodoList(todos []models.Todo, filter string, activeCount int) {
 				hx-on="htmx:afterOnLoad: this.querySelector('input[name=title]').value = ''"
 				class="flex gap-2 mb-6"
 			>
+				<!-- Todo input with character limit and required validation -->
 				<input
 					type="text"
 					name="title"
@@ -39,25 +45,31 @@ templ TodoList(todos []models.Todo, filter string, activeCount int) {
 					Add
 				</button>
 			</form>
+			<!-- Main todo list content component -->
 			@TodoListContent(todos, filter, activeCount)
 		</body>
 	</html>
 }
 
+// TodoListContent renders the list of todos and the footer section with filters
+// and action buttons. This component is the target for HTMX updates
 templ TodoListContent(todos []models.Todo, filter string, activeCount int) {
 	<div id="todo-list">
+		<!-- Iterate through todos and render each item -->
 		for _, todo := range todos {
 			@TodoItem(todo)
 		}
-		<!-- Footer -->
+		<!-- Footer section with item count, filters, and clear completed button -->
 		<div class="flex flex-wrap justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-300">
+			<!-- Active items counter -->
 			<div>{ strconv.Itoa(activeCount) } items left!</div>
-			<!-- Filters -->
+			<!-- Filter navigation links -->
 			<div class="flex gap-2">
 				<a href="/" class={ filterClass(filter, "") }>All</a>
 				<a href="/?filter=active" class={ filterClass(filter, "active") }>Active</a>
 				<a href="/?filter=completed" class={ filterClass(filter, "completed") }>Completed</a>
 			</div>
+			<!-- Conditional delete completed button -->
 			if hasCompleted(todos) {
 				<form
 					hx-post="/todos/completed"
@@ -78,6 +90,8 @@ templ TodoListContent(todos []models.Todo, filter string, activeCount int) {
 	</div>
 }
 
+// hasCompleted checks if there are any completed todos in the list
+// Returns true if at least one todo is completed
 func hasCompleted(todos []models.Todo) bool {
 	for _, t := range todos {
 		if t.Completed {
@@ -87,6 +101,8 @@ func hasCompleted(todos []models.Todo) bool {
 	return false
 }
 
+// filterClass returns the appropriate CSS classes for filter links
+// based on whether they are currently active
 func filterClass(current string, name string) string {
 	if current == name {
 		return "px-2 py-1 border rounded border-red-500"
